@@ -1,0 +1,140 @@
+import json
+import os
+
+# Daftar Mata Pelajaran Kelas XI-IPA/IPAS
+DAFTAR_MAPEL = [
+    "BIOLOGY TL",
+    "PAI",
+    "B INGGRIS",
+    "SEJARAH",
+    "IT TL",
+    "PJOK",
+    "SPDP",
+    "MTK TL",
+    "PKN",
+    "B INDONESIA",
+    "EKONOMI TL",
+    "KIMIA TL",
+    "MTK WAJIB",
+    "FISIKA TL",
+    "BAHASA DAERAH (BAHASA JAWA)"
+]
+
+FILE_DATA = "tugas_xi_ipa.json"
+
+def muat_tugas():
+    """Memuat data tugas dari file JSON jika ada."""
+    if os.path.exists(FILE_DATA):
+        with open(FILE_DATA, "r", encoding="utf-8") as file:
+            try:
+                return json.load(file)
+            except json.JSONDecodeError:
+                return []
+    return []
+
+def simpan_tugas(tugas_list):
+    """Menyimpan data tugas ke file JSON."""
+    with open(FILE_DATA, "w", encoding="utf-8") as file:
+        json.dump(tugas_list, file, indent=4, ensure_ascii=False)
+
+def tampilkan_mapel():
+    print("\n--- DAFTAR MATA PELAJARAN ---")
+    for i, mapel in enumerate(DAFTAR_MAPEL, 1):
+        print(f"{i}. {mapel}")
+
+def lihat_tugas(tugas_list):
+    if not tugas_list:
+        print("\n📭 Belum ada tugas yang tercatat.")
+        return
+
+    print("\n" + "="*60)
+    print(f"{'No':<4} | {'Mata Pelajaran':<28} | {'Tugas':<20} | {'Status'}")
+    print("="*60)
+    for index, tugas in enumerate(tugas_list, 1):
+        status = "✅ Selesai" if tugas['selesai'] else "⏳ Belum"
+        print(f"{index:<4} | {tugas['mapel']:<28} | {tugas['deskripsi']:<20} | {status}")
+    print("="*60)
+
+def tambah_tugas(tugas_list):
+    tampilkan_mapel()
+    try:
+        pilihan = int(input("\nPilih nomor mata pelajaran: "))
+        if 1 <= pilihan <= len(DAFTAR_MAPEL):
+            mapel_pilihan = DAFTAR_MAPEL[pilihan - 1]
+            deskripsi = input("Masukkan detail/judul tugas: ").strip()
+            
+            if not deskripsi:
+                print("❌ Deskripsi tugas tidak boleh kosong!")
+                return
+
+            tugas_baru = {
+                "mapel": mapel_pilihan,
+                "deskripsi": deskripsi,
+                "selesai": False
+            }
+            tugas_list.append(tugas_baru)
+            simpan_tugas(tugas_list)
+            print(f"🎉 Tugas untuk **{mapel_pilihan}** berhasil ditambahkan!")
+        else:
+            print("❌ Pilihan nomor mata pelajaran tidak valid.")
+    except ValueError:
+        print("❌ Harap masukkan angka yang valid.")
+
+def tandai_selesai(tugas_list):
+    lihat_tugas(tugas_list)
+    if not tugas_list:
+        return
+    try:
+        pilihan = int(input("\nMasukkan nomor tugas yang sudah selesai: "))
+        if 1 <= pilihan <= len(tugas_list):
+            tugas_list[pilihan - 1]["selesai"] = True
+            simpan_tugas(tugas_list)
+            print("🎉 Tugas berhasil ditandai sebagai selesai!")
+        else:
+            print("❌ Nomor tugas tidak valid.")
+    except ValueError:
+        print("❌ Harap masukkan angka yang valid.")
+
+def hapus_tugas(tugas_list):
+    lihat_tugas(tugas_list)
+    if not tugas_list:
+        return
+    try:
+        pilihan = int(input("\nMasukkan nomor tugas yang ingin dihapus: "))
+        if 1 <= pilihan <= len(tugas_list):
+            tugas_dihapus = tugas_list.pop(pilihan - 1)
+            simpan_tugas(tugas_list)
+            print(f"🗑️ Tugas '{tugas_dihapus['deskripsi']}' berhasil dihapus.")
+        else:
+            print("❌ Nomor tugas tidak valid.")
+    except ValueError:
+        print("❌ Harap masukkan angka yang valid.")
+
+def main():
+    tugas_list = muat_tugas()
+    while True:
+        print("\n📚 APLIKASI DAFTAR TUGAS KELAS XI-IPA/IPAS")
+        print("1. Lihat Daftar Tugas")
+        print("2. Tambah Tugas Baru")
+        print("3. Tandai Tugas Selesai")
+        print("4. Hapus Tugas")
+        print("5. Keluar")
+        
+        pilihan = input("Pilih menu (1-5): ").strip()
+        
+        if pilihan == "1":
+            lihat_tugas(tugas_list)
+        elif pilihan == "2":
+            tambah_tugas(tugas_list)
+        elif pilihan == "3":
+            tandai_selesai(tugas_list)
+        elif pilihan == "4":
+            hapus_tugas(tugas_list)
+        elif pilihan == "5":
+            print("\n👋 Terima kasih! Tetap semangat belajarnya, ya!")
+            break
+        else:
+            print("❌ Pilihan tidak valid, silakan coba lagi.")
+
+if __name__ == "__main__":
+    main()
